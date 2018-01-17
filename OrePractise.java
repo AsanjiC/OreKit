@@ -107,12 +107,13 @@ public class OrePractise {
 
             // Set up operating mode for the propagator as master mode
             // with fixed step and specialized step handler
-            propagator.setMasterMode(60., new stepHandler());
+            propagator.setMasterMode(1., new stepHandler());
 
             // Extrapolate from the initial to the final date
-            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(630.));
+            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
-            System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");
+            System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");         
+            /*
             System.out.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               finalState.getDate(),
                               o.getA(), o.getE(),
@@ -120,13 +121,12 @@ public class OrePractise {
                               FastMath.toDegrees(o.getPerigeeArgument()),
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
-            
-            
+     	
         } catch (OrekitException oe) {
             System.err.println(oe.getMessage());
         }
     }
-    //Random Comment 55
+    
     
     // Step Handler Class used to print on the output stream at the given step.
     private static class stepHandler implements OrekitFixedStepHandler {
@@ -135,15 +135,16 @@ public class OrePractise {
             //private constructor
         }
 
+        /*
         public  void init(final SpacecraftState s0, final AbsoluteDate t, final double step) {
             System.out.println("          date                a           e" +
                                "           i         \u03c9          \u03a9" +
                                "          \u03bd");
         }
-
+        */
         public  void handleStep(SpacecraftState currentState, boolean isLast) {
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(currentState.getOrbit());
-            
+            /*
             System.out.format(Locale.US, "%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               currentState.getDate(),
                               o.getA(), o.getE(),
@@ -151,6 +152,8 @@ public class OrePractise {
                               FastMath.toDegrees(o.getPerigeeArgument()),
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
+            */
+            System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");      
             if (isLast) {
                 System.out.println("this was the last step ");
                 System.out.println();
