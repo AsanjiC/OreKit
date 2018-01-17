@@ -52,7 +52,7 @@ public class OrePractise {
             DataProvidersManager manager = DataProvidersManager.getInstance();
             manager.addProvider(new DirectoryCrawler(orekitData));
 
-            // Inertial frame
+            // Inertial frame 256
             Frame inertialFrame = FramesFactory.getEME2000();
 
             // Initial date in UTC time scale
