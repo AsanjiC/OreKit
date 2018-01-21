@@ -102,6 +102,7 @@ public class OrePractise {
             ForceModel dragNUM = new DragForce(atm, new IsotropicDrag(sf, cd));
 
             // Add force model to the propagator
+            //Adding a comment here
             propagator.addForceModel(dragNUM);
 
             // Set up initial state in the propagator
