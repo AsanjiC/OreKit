@@ -91,6 +91,8 @@ public class OrePractise {
             propagator.setOrbitType(propagationType);
 
             // Force Model
+            //Adding a comment somewhere
+            
             final double ae = Constants.GRS80_EARTH_EQUATORIAL_RADIUS;
             OneAxisEllipsoid earth = new OneAxisEllipsoid(ae, Constants.WGS84_EARTH_FLATTENING, FramesFactory.getEME2000());
             earth.setAngularThreshold(1.e-6);
