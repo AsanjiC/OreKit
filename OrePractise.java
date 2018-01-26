@@ -1,9 +1,12 @@
 import java.io.File;
 import java.util.Locale;
 
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
+import org.orekit.bodies.FieldGeodeticPoint;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -52,7 +55,7 @@ public class OrePractise {
             DataProvidersManager manager = DataProvidersManager.getInstance();
             manager.addProvider(new DirectoryCrawler(orekitData));
 
-            // Inertial frame 256
+            // Inertial frame 
             Frame inertialFrame = FramesFactory.getEME2000();
 
             // Initial date in UTC time scale
@@ -78,7 +81,7 @@ public class OrePractise {
             
             // Step integrator 
             final double minStep = 0.001;
-            final double maxstep = 1000.0;
+            final double maxstep = 2000.0;
             final double positionTolerance = 10.0;
             final OrbitType propagationType = OrbitType.KEPLERIAN;
             final double[][] tolerances =
@@ -112,8 +115,11 @@ public class OrePractise {
             // Extrapolate from the initial to the final date
             SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
-            System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");         
-            /*
+            //System.out.print(o.initPVCoordinates()+"\n");
+            //These NextTwo Lines is How I Convert the coordinates to get Long. Lat & Altitude 
+            FieldGeodeticPoint<DerivativeStructure> gp = earth.transform(o.initPVCoordinates(),inertialFrame,initialDate.shiftedBy(10.));
+            System.out.print(gp.toString() +"\n");
+            
             System.out.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               finalState.getDate(),
                               o.getA(), o.getE(),
@@ -134,7 +140,6 @@ public class OrePractise {
         private stepHandler() {
             //private constructor
         }
-
         /*
         public  void init(final SpacecraftState s0, final AbsoluteDate t, final double step) {
             System.out.println("          date                a           e" +
@@ -144,6 +149,7 @@ public class OrePractise {
         */
         public  void handleStep(SpacecraftState currentState, boolean isLast) {
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(currentState.getOrbit());
+            System.out.print(o.initPVCoordinates().getPosition()+"\n");  
             /*
             System.out.format(Locale.US, "%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               currentState.getDate(),
@@ -153,7 +159,6 @@ public class OrePractise {
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
             */
-            System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");      
             if (isLast) {
                 System.out.println("this was the last step ");
                 System.out.println();
@@ -163,4 +168,6 @@ public class OrePractise {
     }
 
 }
+
+
 
