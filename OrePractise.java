@@ -110,13 +110,13 @@ public class OrePractise {
 
             // Set up operating mode for the propagator as master mode
             // with fixed step and specialized step handler
-            propagator.setMasterMode(1., new stepHandler());
+            propagator.setMasterMode(60., new stepHandler()); //Parameter used for increment 
 
             // Extrapolate from the initial to the final date
-            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
+            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(60.)); //Shift initial date by 60 seconds
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
             System.out.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");         
-            /*
+            
             System.out.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               finalState.getDate(),
                               o.getA(), o.getE(),
@@ -138,7 +138,7 @@ public class OrePractise {
             //private constructor
         }
 
-        /*
+        
         public  void init(final SpacecraftState s0, final AbsoluteDate t, final double step) {
             System.out.println("          date                a           e" +
                                "           i         \u03c9          \u03a9" +
