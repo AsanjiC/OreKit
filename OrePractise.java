@@ -109,16 +109,20 @@ public class OrePractise {
             propagator.setInitialState(initialState);
 
             // Set up operating mode for the propagator as master mode
-            // with fixed step and specialized step handler
-            propagator.setMasterMode(1., new stepHandler());
+            // with fixed step(seconds) and specialized step handler
+            propagator.setMasterMode(3600., new stepHandler());
 
             // Extrapolate from the initial to the final date
-            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
+            //SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
+            //Updated to Propagate for 1 Month
+            SpacecraftState finalState = propagator.propagate(new AbsoluteDate(initialDate, 2629000.));
+            
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
-            //System.out.print(o.initPVCoordinates()+"\n");
+            System.out.print(o.initPVCoordinates().getPosition()+"\n");
+            
             //These NextTwo Lines is How I Convert the coordinates to get Long. Lat & Altitude 
-            FieldGeodeticPoint<DerivativeStructure> gp = earth.transform(o.initPVCoordinates(),inertialFrame,initialDate.shiftedBy(10.));
-            System.out.print(gp.toString() +"\n");
+            //FieldGeodeticPoint<DerivativeStructure> gp = earth.transform(o.initPVCoordinates(),inertialFrame,initialDate.shiftedBy(10.));
+            //System.out.print(gp.toString() +"\n");
             
             System.out.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               finalState.getDate(),
@@ -127,7 +131,7 @@ public class OrePractise {
                               FastMath.toDegrees(o.getPerigeeArgument()),
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
-     	
+     	    
         } catch (OrekitException oe) {
             System.err.println(oe.getMessage());
         }
@@ -149,7 +153,8 @@ public class OrePractise {
         */
         public  void handleStep(SpacecraftState currentState, boolean isLast) {
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(currentState.getOrbit());
-            System.out.print(o.initPVCoordinates().getPosition()+"\n");  
+            System.out.print(o.initPVCoordinates().getPosition()+"\n"); 
+            
             /*
             System.out.format(Locale.US, "%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               currentState.getDate(),
@@ -170,4 +175,4 @@ public class OrePractise {
 }
 
 
-
+ 
