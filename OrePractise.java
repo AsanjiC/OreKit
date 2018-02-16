@@ -1,14 +1,12 @@
-package org.orekit;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Locale;
-import java.io.PrintWriter;
+
+import org.hipparchus.analysis.differentiation.DerivativeStructure;
 import org.hipparchus.ode.nonstiff.AdaptiveStepsizeIntegrator;
 import org.hipparchus.ode.nonstiff.DormandPrince853Integrator;
 import org.hipparchus.util.FastMath;
+import org.orekit.bodies.FieldGeodeticPoint;
+import org.orekit.bodies.GeodeticPoint;
 import org.orekit.bodies.OneAxisEllipsoid;
 import org.orekit.data.DataProvidersManager;
 import org.orekit.data.DirectoryCrawler;
@@ -38,16 +36,8 @@ import org.orekit.utils.Constants;
 
 public class OrePractise {
 	 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         try {
-        	//Create file in directory named "OrekitData.txt"
-        	File file = new File("C:/Users/Caleb/Documents/GitHub/OreKit/OrekitData.txt");
-        	if(!file.exists()) {
-        		file.createNewFile();
-        	}
-        	//FileWriter fw = new FileWriter(file.getAbsoluteFile());
-        	//Create printstream to write to file
-        	PrintStream ps = new PrintStream(file.getAbsoluteFile());
 
         		//Set HDD a main Directory
             File home       = new File(System.getProperty("user.home"));
@@ -65,7 +55,7 @@ public class OrePractise {
             DataProvidersManager manager = DataProvidersManager.getInstance();
             manager.addProvider(new DirectoryCrawler(orekitData));
 
-            // Inertial frame 256
+            // Inertial frame 
             Frame inertialFrame = FramesFactory.getEME2000();
 
             // Initial date in UTC time scale
@@ -91,7 +81,7 @@ public class OrePractise {
             
             // Step integrator 
             final double minStep = 0.001;
-            final double maxstep = 1000.0;
+            final double maxstep = 2000.0;
             final double positionTolerance = 10.0;
             final OrbitType propagationType = OrbitType.KEPLERIAN;
             final double[][] tolerances =
@@ -104,8 +94,6 @@ public class OrePractise {
             propagator.setOrbitType(propagationType);
 
             // Force Model
-            //Adding a comment somewhere
-            
             final double ae = Constants.GRS80_EARTH_EQUATORIAL_RADIUS;
             OneAxisEllipsoid earth = new OneAxisEllipsoid(ae, Constants.WGS84_EARTH_FLATTENING, FramesFactory.getEME2000());
             earth.setAngularThreshold(1.e-6);
@@ -115,31 +103,35 @@ public class OrePractise {
             ForceModel dragNUM = new DragForce(atm, new IsotropicDrag(sf, cd));
 
             // Add force model to the propagator
-            //Adding a comment here
             propagator.addForceModel(dragNUM);
 
             // Set up initial state in the propagator
             propagator.setInitialState(initialState);
 
             // Set up operating mode for the propagator as master mode
-            // with fixed step and specialized step handler
-            propagator.setMasterMode(60., new stepHandler()); //Parameter used for increment 
+            // with fixed step(seconds) and specialized step handler
+            propagator.setMasterMode(3600., new stepHandler());
 
             // Extrapolate from the initial to the final date
-            SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(7.884e+6)); //Shift initial date by 3 months
-            KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
-            //Print coordinates to file
-            ps.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");         
+            //SpacecraftState finalState = propagator.propagate(initialDate.shiftedBy(10.));
+            //Updated to Propagate for 1 Month
+            SpacecraftState finalState = propagator.propagate(new AbsoluteDate(initialDate, 2629000.));
             
-            ps.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
+            KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(finalState.getOrbit());
+            System.out.print(o.initPVCoordinates().getPosition()+"\n");
+            
+            //These NextTwo Lines is How I Convert the coordinates to get Long. Lat & Altitude 
+            //FieldGeodeticPoint<DerivativeStructure> gp = earth.transform(o.initPVCoordinates(),inertialFrame,initialDate.shiftedBy(10.));
+            //System.out.print(gp.toString() +"\n");
+            
+            System.out.format(Locale.US, "Final state:%n%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               finalState.getDate(),
                               o.getA(), o.getE(),
                               FastMath.toDegrees(o.getI()),
                               FastMath.toDegrees(o.getPerigeeArgument()),
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
-     	//Close print stream
-            ps.close();
+     	    
         } catch (OrekitException oe) {
             System.err.println(oe.getMessage());
         }
@@ -148,27 +140,23 @@ public class OrePractise {
     
     // Step Handler Class used to print on the output stream at the given step.
     private static class stepHandler implements OrekitFixedStepHandler {
-    	
+
         private stepHandler() {
             //private constructor
         }
-
-        
+        /*
         public  void init(final SpacecraftState s0, final AbsoluteDate t, final double step) {
-       
             System.out.println("          date                a           e" +
                                "           i         \u03c9          \u03a9" +
                                "          \u03bd");
         }
-        
+        */
         public  void handleStep(SpacecraftState currentState, boolean isLast) {
-        	try {
-            //Create printstream to write to file for each step
-        	String filename = "OrekitData.txt";
-        	PrintStream ps = new PrintStream(filename);
             KeplerianOrbit o = (KeplerianOrbit) OrbitType.KEPLERIAN.convertType(currentState.getOrbit());
+            System.out.print(o.initPVCoordinates().getPosition()+"\n"); 
+            
             /*
-            ps.format(Locale.US, "%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
+            System.out.format(Locale.US, "%s %12.3f %10.8f %10.6f %10.6f %10.6f %10.6f%n",
                               currentState.getDate(),
                               o.getA(), o.getE(),
                               FastMath.toDegrees(o.getI()),
@@ -176,23 +164,15 @@ public class OrePractise {
                               FastMath.toDegrees(o.getRightAscensionOfAscendingNode()),
                               FastMath.toDegrees(o.getTrueAnomaly()));
             */
-            //Print coordinates and final state to file
-            ps.print("\nPVC Coords: " + o.initPVCoordinates()+"\n");      
             if (isLast) {
-                ps.print("this was the last step ");
-                ps.println();
-                ps.close();
-                System.out.println("Done.");
+                System.out.println("this was the last step ");
+                System.out.println();
             }
-            	
         }
-        catch(Exception e) {
-        	e.printStackTrace();
-        }
-    	
+
     }
 
 }
-}
 
 
+ 
